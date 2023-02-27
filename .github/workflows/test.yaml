@@ -7,15 +7,16 @@ on:
 
 jobs:
   test-code:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        version: ["3.8", "3.9", "3.10"]
+        os: [ubtuntu-22.04, windws-2022, macos-12]
+        version: ["3.8", "3.9", "3.10"], 
     steps:
       - name: checkout code
         uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-        name: set up py38
+        name: set up py-${{ matrix.version}}
         with:
           python-version: ${{ matrix.version }}
       - name: install requirements
@@ -24,10 +25,10 @@ jobs:
         id: run-py-test
         run: pytest --cov-report html:htmlcov --cov-report term --cov=project tests
       - name: upload test reports
-        # if: failure() && steps.run-pay-test.outcome == 'failure'
+        if: failure() && steps.run-pay-test.outcome == 'failure'
         uses: actions/upload-artifact@v3
         with:
-          name: test-report-${{ matrix.version }}
+          name: test-report-python_${{ matrix.version }}-os_${{ matrix.os }}
           path: htmlcov/
 
   deploy:
